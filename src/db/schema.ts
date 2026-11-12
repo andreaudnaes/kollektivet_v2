@@ -147,3 +147,32 @@ export const cleaningTaskChecks = sqliteTable(
   },
   (table) => [primaryKey({ columns: [table.taskId, table.week] })],
 );
+
+// ---------------------------------------------------------------------------
+// Handleliste
+// ---------------------------------------------------------------------------
+
+/** En vare på den felles handlelista. Kjøpte varer beholdes, så de kan foreslås senere. */
+export const shoppingItems = sqliteTable(
+  "shopping_items",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    /** Fritekst, f.eks. "2 stk" eller "1 liter". */
+    quantity: text("quantity"),
+    /** Fritekst, f.eks. "den laktosefrie". */
+    note: text("note"),
+    addedBy: text("added_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    /** Satt når varen er kjøpt. */
+    boughtBy: text("bought_by").references(() => users.id, { onDelete: "set null" }),
+    boughtAt: integer("bought_at", { mode: "timestamp_ms" }),
+  },
+  (table) => [index("shopping_items_bought_at_idx").on(table.boughtAt)],
+);
