@@ -7,7 +7,7 @@ import { CalendarIcon, CartIcon, CleaningIcon, HomeIcon } from "./icons";
 const items = [
   { href: "/", label: "Hjem", Icon: HomeIcon },
   { href: "/vaskeliste", label: "Vask", Icon: CleaningIcon },
-  { href: null, label: "Handle", Icon: CartIcon },
+  { href: "/handleliste", label: "Handle", Icon: CartIcon },
   { href: null, label: "Kalender", Icon: CalendarIcon },
 ] as const;
 

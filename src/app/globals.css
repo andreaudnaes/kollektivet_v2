@@ -19,3 +19,8 @@ body {
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Skjul pila Chrome viser i tekstfelt med forslagsliste (datalist). */
+input[list]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}

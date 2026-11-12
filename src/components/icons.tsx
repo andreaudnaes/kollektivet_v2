@@ -113,3 +113,17 @@ export const ArrowDownIcon = (p: IconProps) => (
     <path d="M6 13l6 6 6-6" />
   </Svg>
 );
+
+export const XIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 6l12 12" />
+    <path d="M18 6L6 18" />
+  </Svg>
+);
+
+export const PlusIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 5v14" />
+    <path d="M5 12h14" />
+  </Svg>
+);

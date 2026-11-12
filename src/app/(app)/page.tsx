@@ -4,6 +4,7 @@ import { BoxIcon, CalendarIcon, CartIcon, CleaningIcon, UserIcon } from "@/compo
 import { Page, ui } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
 import { assignmentForWeek, getAreas, getWeekProgress } from "@/lib/cleaning";
+import { countOpenItems } from "@/lib/shopping";
 import { currentWeek, weekNumber } from "@/lib/weeks";
 
 export default function Home() {
@@ -38,7 +39,11 @@ function todayLabel() {
 async function HomeContent() {
   const me = await getCurrentUser();
   const week = currentWeek();
-  const [areas, progress] = await Promise.all([getAreas(week, week), getWeekProgress(week)]);
+  const [areas, progress, openItems] = await Promise.all([
+    getAreas(week, week),
+    getWeekProgress(week),
+    countOpenItems(),
+  ]);
 
   const active = areas
     .map((area) => ({ area, assignment: assignmentForWeek(area, week) }))
@@ -121,7 +126,20 @@ async function HomeContent() {
               </span>
             </span>
           </Link>
-          <ComingSoon title="Handleliste" Icon={CartIcon} />
+          <Link
+            href="/handleliste"
+            className={`${ui.card} flex flex-col gap-7 rounded-2xl p-4 transition hover:bg-gray-50`}
+          >
+            <span className="flex size-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
+              <CartIcon />
+            </span>
+            <span className="flex flex-col gap-0.5">
+              <span className="font-semibold">Handleliste</span>
+              <span className="text-[13px] text-gray-600">
+                {openItems === 0 ? "Ingenting å kjøpe" : `${openItems} ${openItems === 1 ? "vare" : "varer"} å kjøpe`}
+              </span>
+            </span>
+          </Link>
           <ComingSoon title="Kalender" Icon={CalendarIcon} />
           <ComingSoon title="Beholdning" Icon={BoxIcon} />
         </div>

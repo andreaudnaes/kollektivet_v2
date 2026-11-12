@@ -37,6 +37,12 @@ bun run dev
 - **Enkeltuker** kan overstyres i innstillingene: gi uka til noen andre, eller sett «Ingen vask». Resten av rotasjonen påvirkes ikke.
 - Logikken ligger i `src/lib/rotation.ts` og `src/lib/weeks.ts`, med tester i `src/lib/rotation.test.ts` (`bun test`).
 
+## Handleliste
+- **Én felles liste** for hele kollektivet. Varer kan ha **antall** og **kommentar**, og man ser hvem som la dem til.
+- Kryss av når noe er kjøpt. Varen flyttes til **Handlet** med hvem som kjøpte og når, kan angres, og skjules etter 3 dager.
+- Når man skriver, foreslås **varer som er kjøpt før**, de mest brukte først.
+- Samme vare kan ikke stå på lista to ganger.
+
 ## Innlogging
 - Beboere registrerer seg med **navn**, **firesifret PIN** og den felles **invitasjonskoden** (`INVITE_CODE`).
 - PIN-koden lagres hashet med scrypt.
@@ -60,7 +66,7 @@ bun run dev
 src/
   app/
     (auth)/   Innlogging og registrering (sider + Server Actions)
-    (app)/    Sider for innloggede: forside, vaskeliste, profil (med bunnmeny)
+    (app)/    Sider for innloggede: forside, vaskeliste, handleliste, profil (med bunnmeny)
   components/ Felles komponenter, ikoner og bunnmeny
   db/         Databaseklient og skjema (Drizzle)
   lib/        Innlogging, uker, rotasjon og datahenting
