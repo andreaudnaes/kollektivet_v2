@@ -1,7 +1,7 @@
 "use server";
 
 import { eq, max } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { invalidateAll } from "@/lib/revalidate";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { calendarCategories, calendarEvents } from "@/db/schema";
@@ -68,6 +68,7 @@ export async function createEvent(_prev: EventFormState, formData: FormData): Pr
   if ("error" in result) return { error: result.error };
 
   await db.insert(calendarEvents).values({ ...result.values, createdBy: user.id });
+  invalidateAll();
   redirect(`/kalender?visning=dag&dato=${result.values.startDate}`);
 }
 
@@ -81,12 +82,14 @@ export async function updateEvent(
   if ("error" in result) return { error: result.error };
 
   await db.update(calendarEvents).set(result.values).where(eq(calendarEvents.id, eventId));
+  invalidateAll();
   redirect(`/kalender?visning=dag&dato=${result.values.startDate}`);
 }
 
 export async function deleteEvent(eventId: string, returnDate: string) {
   await getCurrentUser();
   await db.delete(calendarEvents).where(eq(calendarEvents.id, eventId));
+  invalidateAll();
   redirect(`/kalender?visning=dag&dato=${isDate(returnDate) ? returnDate : ""}`);
 }
 
@@ -102,7 +105,7 @@ export async function createCategory(formData: FormData) {
     .select({ maxPosition: max(calendarCategories.position) })
     .from(calendarCategories);
   await db.insert(calendarCategories).values({ name, color, position: (maxPosition ?? -1) + 1 });
-  refresh();
+  invalidateAll();
 }
 
 export async function updateCategory(categoryId: string, formData: FormData) {
@@ -111,7 +114,7 @@ export async function updateCategory(categoryId: string, formData: FormData) {
   const color = String(formData.get("color") ?? "");
   if (!name || !isCategoryColorId(color)) return;
   await db.update(calendarCategories).set({ name, color }).where(eq(calendarCategories.id, categoryId));
-  refresh();
+  invalidateAll();
 }
 
 export async function deleteCategory(categoryId: string) {
@@ -121,5 +124,5 @@ export async function deleteCategory(categoryId: string) {
     db.update(calendarEvents).set({ categoryId: null }).where(eq(calendarEvents.categoryId, categoryId)),
     db.delete(calendarCategories).where(eq(calendarCategories.id, categoryId)),
   ]);
-  refresh();
+  invalidateAll();
 }

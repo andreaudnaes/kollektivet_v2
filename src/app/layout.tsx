@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import "@fontsource-variable/inter";
 import "./globals.css";
 import { accentColor } from "@/lib/colors";
-import { getSessionUser } from "@/lib/session";
+import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = {
   title: "Kollektivet",
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
 /** Setter aksentfargen til den innloggede beboerens valg. */
 async function ThemeStyle() {
-  const user = await getSessionUser();
+  const user = await getViewer();
   const { hex } = accentColor(user?.color);
   return <style>{`:root{--accent:${hex}}`}</style>;
 }

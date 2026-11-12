@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Page, PageHeader } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
@@ -21,6 +22,8 @@ export default function EventPage({ params }: PageProps<"/kalender/[id]">) {
 }
 
 async function EditEvent({ params }: { params: PageProps<"/kalender/[id]">["params"] }) {
+  // Hentes ved hvert besøk (ikke på forhånd), siden siden brukes sjelden.
+  await connection();
   const me = await getCurrentUser();
   const { id } = await params;
   const [event, categories, residents] = await Promise.all([getEvent(id), listCategories(), listResidents()]);

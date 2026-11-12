@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
@@ -48,6 +49,8 @@ function ColorChoices({ name, selected }: { name: string; selected: string }) {
 }
 
 async function Categories() {
+  // Hentes ved hvert besøk (ikke på forhånd), siden siden brukes sjelden.
+  await connection();
   await getCurrentUser();
   const categories = await listCategories();
 

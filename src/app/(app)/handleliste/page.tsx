@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { cacheLife } from "next/cache";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
-import { getCurrentUser } from "@/lib/auth";
 import { listResidents } from "@/lib/cleaning";
+import { CLIENT_STALE_SECONDS } from "@/lib/page-cache";
+import { getSessionUser } from "@/lib/session";
 import { BOUGHT_VISIBLE_DAYS, getShoppingList, getSuggestions } from "@/lib/shopping";
 import { todayInOslo } from "@/lib/weeks";
 import { AddItemForm, ItemRow } from "./shopping-controls";
@@ -19,9 +22,17 @@ export default function ShoppingPage() {
   );
 }
 
-async function ShoppingList() {
-  const me = await getCurrentUser();
-  const [{ open, bought }, suggestions, residents] = await Promise.all([
+/**
+ * Data for handlelista, hentet på forhånd og husket i nettleseren en stund.
+ * Tekstene med «i dag 14:30» lages her, siden de avhenger av klokka.
+ */
+async function loadShopping() {
+  "use cache: private";
+  cacheLife({ stale: CLIENT_STALE_SECONDS });
+
+  const me = await getSessionUser();
+  if (!me) return null;
+  const [list, suggestions, residents] = await Promise.all([
     getShoppingList(),
     getSuggestions(),
     listResidents(),
@@ -30,9 +41,25 @@ async function ShoppingList() {
   const nameOf = (id: string | null) =>
     id === me.id ? "deg" : id ? (names.get(id) ?? "ukjent") : "ukjent";
 
+  const open = list.open.map((item) => ({
+    ...item,
+    meta: `Lagt til av ${nameOf(item.addedBy)} ${relativeDay(item.createdAt)}`,
+  }));
+  const bought = list.bought.map((item) => ({
+    ...item,
+    meta: `Kjøpt av ${nameOf(item.boughtBy)} ${item.boughtAt ? relativeDay(item.boughtAt) : ""}`,
+  }));
+
   // Forslag: bare det som ikke allerede står på lista.
   const openNames = new Set(open.map((i) => i.name.toLowerCase()));
   const freshSuggestions = suggestions.filter((s) => !openNames.has(s.toLowerCase()));
+  return { open, bought, freshSuggestions };
+}
+
+async function ShoppingList() {
+  const data = await loadShopping();
+  if (!data) redirect("/logg-inn");
+  const { open, bought, freshSuggestions } = data;
 
   return (
     <>
@@ -56,7 +83,7 @@ async function ShoppingList() {
               quantity={item.quantity}
               note={item.note}
               bought={false}
-              meta={`Lagt til av ${nameOf(item.addedBy)} ${relativeDay(item.createdAt)}`}
+              meta={item.meta}
             />
           ))}
         </ul>
@@ -78,7 +105,7 @@ async function ShoppingList() {
                 quantity={item.quantity}
                 note={item.note}
                 bought
-                meta={`Kjøpt av ${nameOf(item.boughtBy)} ${item.boughtAt ? relativeDay(item.boughtAt) : ""}`}
+                meta={item.meta}
               />
             ))}
           </ul>

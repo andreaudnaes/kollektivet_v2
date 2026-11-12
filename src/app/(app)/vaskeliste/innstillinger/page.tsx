@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ChevronIcon } from "@/components/icons";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
@@ -32,6 +33,8 @@ export default function CleaningSettingsPage() {
 }
 
 async function AreaList() {
+  // Hentes ved hvert besøk (ikke på forhånd), siden siden brukes sjelden.
+  await connection();
   await getCurrentUser();
   const week = currentWeek();
   const [areas, residents] = await Promise.all([getAreas(week, week), listResidents()]);

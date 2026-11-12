@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq, inArray, max } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { invalidateAll } from "@/lib/revalidate";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import {
@@ -55,7 +55,7 @@ export async function setAreaDone(areaId: string, week: string, done: boolean) {
       .delete(cleaningCompletions)
       .where(and(eq(cleaningCompletions.areaId, areaId), eq(cleaningCompletions.week, week)));
   }
-  refresh();
+  invalidateAll();
 }
 
 export async function setTaskChecked(taskId: string, week: string, checked: boolean) {
@@ -74,7 +74,7 @@ export async function setTaskChecked(taskId: string, week: string, checked: bool
       .delete(cleaningTaskChecks)
       .where(and(eq(cleaningTaskChecks.taskId, taskId), eq(cleaningTaskChecks.week, week)));
   }
-  refresh();
+  invalidateAll();
 }
 
 // --- Områder -----------------------------------------------------------------
@@ -101,6 +101,8 @@ export async function createArea(formData: FormData) {
       .values(residents.map((r, position) => ({ areaId: area.id, userId: r.id, position })));
   }
 
+  invalidateAll();
+
   redirect(`/vaskeliste/innstillinger/${area.id}`);
 }
 
@@ -110,7 +112,7 @@ export async function renameArea(areaId: string, formData: FormData) {
   const name = text(formData, "name", 40);
   if (!name) return;
   await db.update(cleaningAreas).set({ name }).where(eq(cleaningAreas.id, areaId));
-  refresh();
+  invalidateAll();
 }
 
 export async function updateRotation(areaId: string, formData: FormData) {
@@ -126,7 +128,7 @@ export async function updateRotation(areaId: string, formData: FormData) {
     .update(cleaningAreas)
     .set({ intervalWeeks, startWeek })
     .where(eq(cleaningAreas.id, areaId));
-  refresh();
+  invalidateAll();
 }
 
 export async function deleteArea(areaId: string) {
@@ -148,6 +150,8 @@ export async function deleteArea(areaId: string) {
     db.delete(cleaningAreaMembers).where(eq(cleaningAreaMembers.areaId, areaId)),
     db.delete(cleaningAreas).where(eq(cleaningAreas.id, areaId)),
   ]);
+
+  invalidateAll();
 
   redirect("/vaskeliste/innstillinger");
 }
@@ -179,7 +183,7 @@ export async function addMember(areaId: string, userId: string) {
   await requireResident(userId);
   const ids = await memberIds(areaId);
   if (!ids.includes(userId)) await saveMembers(areaId, [...ids, userId]);
-  refresh();
+  invalidateAll();
 }
 
 export async function removeMember(areaId: string, userId: string) {
@@ -190,7 +194,7 @@ export async function removeMember(areaId: string, userId: string) {
     areaId,
     ids.filter((id) => id !== userId),
   );
-  refresh();
+  invalidateAll();
 }
 
 export async function moveMember(areaId: string, userId: string, direction: -1 | 1) {
@@ -202,7 +206,7 @@ export async function moveMember(areaId: string, userId: string, direction: -1 |
   if (from === -1 || to < 0 || to >= ids.length) return;
   [ids[from], ids[to]] = [ids[to], ids[from]];
   await saveMembers(areaId, ids);
-  refresh();
+  invalidateAll();
 }
 
 // --- Huskeliste ---------------------------------------------------------------
@@ -221,7 +225,7 @@ export async function addTask(areaId: string, formData: FormData) {
   await db
     .insert(cleaningTasks)
     .values({ areaId, text: taskText, position: (maxPosition ?? -1) + 1 });
-  refresh();
+  invalidateAll();
 }
 
 export async function deleteTask(taskId: string) {
@@ -230,7 +234,7 @@ export async function deleteTask(taskId: string) {
     db.delete(cleaningTaskChecks).where(eq(cleaningTaskChecks.taskId, taskId)),
     db.delete(cleaningTasks).where(eq(cleaningTasks.id, taskId)),
   ]);
-  refresh();
+  invalidateAll();
 }
 
 // --- Enkeltuker ---------------------------------------------------------------
@@ -263,5 +267,5 @@ export async function setWeekOverride(areaId: string, week: string, value: strin
         set: { userId },
       });
   }
-  refresh();
+  invalidateAll();
 }

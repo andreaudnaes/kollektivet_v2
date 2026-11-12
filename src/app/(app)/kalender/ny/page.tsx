@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Page, PageHeader } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
@@ -21,6 +22,8 @@ export default function NewEventPage({ searchParams }: PageProps<"/kalender/ny">
 }
 
 async function NewEvent({ searchParams }: { searchParams: PageProps<"/kalender/ny">["searchParams"] }) {
+  // Hentes ved hvert besøk (ikke på forhånd), siden siden brukes sjelden.
+  await connection();
   await getCurrentUser();
   const { dato } = await searchParams;
   const date = typeof dato === "string" && isDate(dato) ? dato : todayInOslo();

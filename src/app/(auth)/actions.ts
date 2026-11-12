@@ -2,6 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { invalidateAll } from "@/lib/revalidate";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { hashPin, safeEqual, verifyPin } from "@/lib/pin";
@@ -51,6 +52,7 @@ export async function register(_prev: FormState, formData: FormData): Promise<Fo
     .returning({ id: users.id });
 
   await createSession(user.id);
+  invalidateAll();
   redirect("/");
 }
 
@@ -93,10 +95,12 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
     .where(eq(users.id, user.id));
 
   await createSession(user.id);
+  invalidateAll();
   redirect("/");
 }
 
 export async function logout() {
   await deleteSession();
+  invalidateAll();
   redirect("/logg-inn");
 }

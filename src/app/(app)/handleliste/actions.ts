@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { invalidateAll } from "@/lib/revalidate";
 import { db } from "@/db";
 import { shoppingItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -30,7 +30,7 @@ export async function addItem(prev: AddItemState, formData: FormData): Promise<A
     note: clean(formData.get("note"), 80),
     addedBy: user.id,
   });
-  refresh();
+  invalidateAll();
   // ok endres hver gang, så skjemaet vet at det skal tømmes.
   return { ok: (prev?.ok ?? 0) + 1 };
 }
@@ -41,11 +41,11 @@ export async function setBought(itemId: string, bought: boolean) {
     .update(shoppingItems)
     .set(bought ? { boughtBy: user.id, boughtAt: new Date() } : { boughtBy: null, boughtAt: null })
     .where(eq(shoppingItems.id, itemId));
-  refresh();
+  invalidateAll();
 }
 
 export async function deleteItem(itemId: string) {
   await getCurrentUser();
   await db.delete(shoppingItems).where(eq(shoppingItems.id, itemId));
-  refresh();
+  invalidateAll();
 }

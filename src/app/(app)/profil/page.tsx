@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
-import { getCurrentUser } from "@/lib/auth";
+import { getViewer } from "@/lib/viewer";
 import { DEFAULT_COLOR, accentColor } from "@/lib/colors";
 import { logout } from "../../(auth)/actions";
 import { ColorPicker } from "./color-picker";
@@ -20,7 +21,8 @@ export default function ProfilePage() {
 }
 
 async function Profile() {
-  const me = await getCurrentUser();
+  const me = await getViewer();
+  if (!me) redirect("/logg-inn");
   const color = me.color ? accentColor(me.color).id : DEFAULT_COLOR;
 
   return (

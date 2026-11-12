@@ -45,6 +45,7 @@ export function NavBar({ pathname }: { pathname: string | null }) {
             <Link
               key={label}
               href={href}
+              prefetch
               aria-current={active ? "page" : undefined}
               className={`flex flex-col items-center gap-1 rounded-2xl py-2 text-[11px] transition ${
                 active

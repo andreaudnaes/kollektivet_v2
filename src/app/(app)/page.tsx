@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { cacheLife } from "next/cache";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { BoxIcon, CalendarIcon, CartIcon, CleaningIcon, UserIcon } from "@/components/icons";
 import { Page, ui } from "@/components/ui";
-import { getCurrentUser } from "@/lib/auth";
 import { assignmentForWeek, getAreas, getWeekProgress } from "@/lib/cleaning";
 import { getUpcomingEvents } from "@/lib/calendar";
 import { shortDateLabel } from "@/lib/dates";
+import { CLIENT_STALE_SECONDS } from "@/lib/page-cache";
+import { getSessionUser } from "@/lib/session";
 import { countOpenItems } from "@/lib/shopping";
 import { currentWeek, todayInOslo, weekNumber } from "@/lib/weeks";
 
@@ -38,16 +41,32 @@ function todayLabel() {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-async function HomeContent() {
-  const me = await getCurrentUser();
+/**
+ * Alt forsiden trenger. «use cache: private» gjør at resultatet kan hentes på
+ * forhånd og huskes i nettleseren til denne brukeren en stund, så forsiden
+ * åpnes med en gang. Det tømmes når noen endrer noe i appen.
+ */
+async function loadHome() {
+  "use cache: private";
+  cacheLife({ stale: CLIENT_STALE_SECONDS });
+
+  const me = await getSessionUser();
+  if (!me) return null;
   const week = currentWeek();
+  const today = todayInOslo();
   const [areas, progress, openItems, upcoming] = await Promise.all([
     getAreas(week, week),
     getWeekProgress(week),
     countOpenItems(),
-    getUpcomingEvents(todayInOslo(), 1),
+    getUpcomingEvents(today, 1),
   ]);
-  const nextEvent = upcoming[0];
+  return { me, week, today, dateLabel: todayLabel(), areas, progress, openItems, nextEvent: upcoming[0] };
+}
+
+async function HomeContent() {
+  const data = await loadHome();
+  if (!data) redirect("/logg-inn");
+  const { me, week, today, dateLabel, areas, progress, openItems, nextEvent } = data;
 
   const active = areas
     .map((area) => ({ area, assignment: assignmentForWeek(area, week) }))
@@ -61,7 +80,7 @@ async function HomeContent() {
     <>
       <header className="flex items-start justify-between pb-1">
         <div className="flex flex-col gap-1">
-          <p className="text-sm text-gray-600">{todayLabel()}</p>
+          <p className="text-sm text-gray-600">{dateLabel}</p>
           <h1 className="text-[30px] font-bold tracking-[-0.02em]">Hei, {me.name}</h1>
         </div>
         <Link href="/profil" aria-label="Profil og innstillinger" className={ui.iconButton}>
@@ -118,6 +137,7 @@ async function HomeContent() {
         <div className="grid grid-cols-2 gap-3">
           <Link
             href="/vaskeliste"
+            prefetch
             className={`${ui.card} flex flex-col gap-7 rounded-2xl p-4 transition hover:bg-gray-50`}
           >
             <span className="flex size-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
@@ -132,6 +152,7 @@ async function HomeContent() {
           </Link>
           <Link
             href="/handleliste"
+            prefetch
             className={`${ui.card} flex flex-col gap-7 rounded-2xl p-4 transition hover:bg-gray-50`}
           >
             <span className="flex size-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
@@ -146,6 +167,7 @@ async function HomeContent() {
           </Link>
           <Link
             href="/kalender"
+            prefetch
             className={`${ui.card} flex flex-col gap-7 rounded-2xl p-4 transition hover:bg-gray-50`}
           >
             <span className="flex size-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
@@ -155,7 +177,7 @@ async function HomeContent() {
               <span className="font-semibold">Kalender</span>
               <span className="truncate text-[13px] text-gray-600">
                 {nextEvent
-                  ? `${nextEvent.title} · ${nextEvent.startDate <= todayInOslo() ? "i dag" : shortDateLabel(nextEvent.startDate)}`
+                  ? `${nextEvent.title} · ${nextEvent.startDate <= today ? "i dag" : shortDateLabel(nextEvent.startDate)}`
                   : "Ingen planer ennå"}
               </span>
             </span>

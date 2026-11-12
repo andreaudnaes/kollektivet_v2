@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cacheLife } from "next/cache";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { BackIcon, ChevronIcon, PlusIcon, SlidersIcon } from "@/components/icons";
 import { Page, ui } from "@/components/ui";
-import { getCurrentUser } from "@/lib/auth";
 import { getEventsInRange, listCategories } from "@/lib/calendar";
 import {
   addDays,
@@ -17,6 +18,8 @@ import {
   toMinutes,
   weekDays,
 } from "@/lib/dates";
+import { CLIENT_STALE_SECONDS } from "@/lib/page-cache";
+import { getSessionUser } from "@/lib/session";
 import { todayInOslo, weekNumber } from "@/lib/weeks";
 import { DayView, MonthView, WeekView } from "./views";
 
@@ -39,12 +42,16 @@ export default function CalendarPage({ searchParams }: PageProps<"/kalender">) {
   );
 }
 
-async function Calendar({ searchParams }: { searchParams: PageProps<"/kalender">["searchParams"] }) {
-  await getCurrentUser();
-  const params = await searchParams;
+/** Data for kalenderen, hentet på forhånd og husket i nettleseren en stund. */
+async function loadCalendar(viewParam: string | undefined, dateParam: string | undefined) {
+  "use cache: private";
+  cacheLife({ stale: CLIENT_STALE_SECONDS });
+
+  const me = await getSessionUser();
+  if (!me) return null;
   const today = todayInOslo();
-  const view: View = VIEWS.some((v) => v.id === params.visning) ? (params.visning as View) : "maned";
-  const date = typeof params.dato === "string" && isDate(params.dato) ? params.dato : today;
+  const view: View = VIEWS.some((v) => v.id === viewParam) ? (viewParam as View) : "maned";
+  const date = isDate(dateParam) ? dateParam : today;
 
   // Hvilke datoer som vises, og hvor pilene fører.
   let from: string;
@@ -74,11 +81,22 @@ async function Calendar({ searchParams }: { searchParams: PageProps<"/kalender">
   }
 
   const [events, categoryList] = await Promise.all([getEventsInRange(from, to), listCategories()]);
-  const categories = new Map(categoryList.map((c) => [c.id, c]));
-  const href = (v: View, d: string) => `/kalender?visning=${v}&dato=${d}`;
   const nowMinutes = toMinutes(
     new Date().toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Oslo" }),
   );
+  return { today, view, date, label, prev, next, events, categoryList, nowMinutes };
+}
+
+async function Calendar({ searchParams }: { searchParams: PageProps<"/kalender">["searchParams"] }) {
+  const params = await searchParams;
+  const data = await loadCalendar(
+    typeof params.visning === "string" ? params.visning : undefined,
+    typeof params.dato === "string" ? params.dato : undefined,
+  );
+  if (!data) redirect("/logg-inn");
+  const { today, view, date, label, prev, next, events, categoryList, nowMinutes } = data;
+  const categories = new Map(categoryList.map((c) => [c.id, c]));
+  const href = (v: View, d: string) => `/kalender?visning=${v}&dato=${d}`;
 
   return (
     <>
@@ -95,6 +113,7 @@ async function Calendar({ searchParams }: { searchParams: PageProps<"/kalender">
             <Link
               key={v.id}
               href={href(v.id, date)}
+              prefetch
               aria-current={v.id === view ? "page" : undefined}
               className={`flex h-9 items-center justify-center rounded-xl text-sm transition ${
                 v.id === view ? "bg-white font-semibold shadow-sm" : "font-medium text-gray-600 hover:text-gray-900"
@@ -106,11 +125,11 @@ async function Calendar({ searchParams }: { searchParams: PageProps<"/kalender">
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href={href(view, prev)} aria-label="Forrige" className={ui.iconButton}>
+          <Link href={href(view, prev)} prefetch aria-label="Forrige" className={ui.iconButton}>
             <BackIcon />
           </Link>
           <span className="flex-1 text-center text-lg font-semibold">{label}</span>
-          <Link href={href(view, next)} aria-label="Neste" className={ui.iconButton}>
+          <Link href={href(view, next)} prefetch aria-label="Neste" className={ui.iconButton}>
             <ChevronIcon />
           </Link>
         </div>

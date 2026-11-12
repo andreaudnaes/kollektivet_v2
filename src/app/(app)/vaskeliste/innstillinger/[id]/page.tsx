@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
@@ -32,6 +33,8 @@ export default function AreaSettingsPage({ params }: PageProps<"/vaskeliste/inns
 }
 
 async function AreaSettings({ params }: { params: PageProps<"/vaskeliste/innstillinger/[id]">["params"] }) {
+  // Hentes ved hvert besøk (ikke på forhånd), siden siden brukes sjelden.
+  await connection();
   await getCurrentUser();
   const { id } = await params;
   const week = currentWeek();

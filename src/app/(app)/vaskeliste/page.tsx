@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cacheLife } from "next/cache";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SlidersIcon } from "@/components/icons";
 import { Page, PageHeader, Section, ui } from "@/components/ui";
-import { getCurrentUser } from "@/lib/auth";
 import {
   assignmentForWeek,
   getAreas,
@@ -11,7 +12,9 @@ import {
   listResidents,
   type AreaWithRotation,
 } from "@/lib/cleaning";
+import { CLIENT_STALE_SECONDS } from "@/lib/page-cache";
 import type { Assignment } from "@/lib/rotation";
+import { getSessionUser } from "@/lib/session";
 import { addWeeks, currentWeek, weekNumber, weekRangeLabel } from "@/lib/weeks";
 import { DoneButton, TaskCheckbox } from "./check-controls";
 
@@ -29,16 +32,26 @@ export default function CleaningPage() {
   );
 }
 
-async function CleaningOverview() {
-  const me = await getCurrentUser();
-  const week = currentWeek();
-  const lastWeek = addWeeks(week, UPCOMING_WEEKS);
+/** Data for vaskelista, hentet på forhånd og husket i nettleseren en stund. */
+async function loadCleaning() {
+  "use cache: private";
+  cacheLife({ stale: CLIENT_STALE_SECONDS });
 
+  const me = await getSessionUser();
+  if (!me) return null;
+  const week = currentWeek();
   const [areas, progress, residents] = await Promise.all([
-    getAreas(week, lastWeek),
+    getAreas(week, addWeeks(week, UPCOMING_WEEKS)),
     getWeekProgress(week),
     listResidents(),
   ]);
+  return { me, week, areas, progress, residents };
+}
+
+async function CleaningOverview() {
+  const data = await loadCleaning();
+  if (!data) redirect("/logg-inn");
+  const { me, week, areas, progress, residents } = data;
   const names = new Map(residents.map((r) => [r.id, r.name]));
   const nameOf = (id: string) => (id === me.id ? "deg" : (names.get(id) ?? "ukjent"));
 
