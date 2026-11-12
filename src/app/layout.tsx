@@ -8,6 +8,12 @@ import { getSessionUser } from "@/lib/session";
 export const metadata: Metadata = {
   title: "Kollektivet",
   description: "Felles oversikt for kollektivet",
+  // For iPhone: navn under ikonet og fullskjerm når appen åpnes fra hjemskjermen.
+  appleWebApp: {
+    capable: true,
+    title: "Kollektivet",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {

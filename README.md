@@ -30,6 +30,10 @@ bun run dev
 - Designet («Klar») bruker felles stiler fra `src/components/ui.tsx` og en bunnmeny for mobil.
 - Hver beboer velger sin egen **aksentfarge** under **Profil** (9 farger, grønn er standard). Fargene ligger i `src/lib/colors.ts` og settes som CSS-variabelen `--accent` (Tailwind: `bg-accent`, `text-accent`, `bg-accent-tint`).
 
+## App-ikon og hjemskjerm
+- Logoen (4b: huset med tre like beboere) ligger i `src/app/icon.svg` (nettleserfane), `src/app/apple-icon.png` (iPhone) og `public/icon-192.png` / `icon-512.png` (Android).
+- `src/app/manifest.ts` gjør at appen får eget navn og ikon og åpnes i fullskjerm fra hjemskjermen.
+
 ## Vaskeliste
 - **Ansvarsområder** (kjøkken, bad …) med egen rotasjon: hvem som er med, rekkefølge, hvor ofte det bytter (hver/annenhver/hver tredje uke) og startuke.
 - Rotasjonen regnes ut automatisk ut fra uke (mandag–søndag, norsk tid). Ingen må trykke «roter».
