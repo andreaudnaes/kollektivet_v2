@@ -20,10 +20,18 @@ Foreløpig er appen bare for vårt eget kollektiv. Man registrerer seg med navn 
 ## Kom i gang
 ```bash
 bun install
-cp .env.example .env.local
+cp .env.example .env.local   # sett INVITE_CODE til noe eget
+bun run db:migrate           # lager tabellene i local.db
 bun run dev
 ```
-Åpne http://localhost:3000.
+Åpne http://localhost:3000 og registrer deg med navn, en firesifret PIN og invitasjonskoden.
+
+## Innlogging
+- Beboere registrerer seg med **navn**, **firesifret PIN** og den felles **invitasjonskoden** (`INVITE_CODE`).
+- PIN-koden lagres hashet med scrypt.
+- Etter **5 feil forsøk** låses kontoen i 15 minutter.
+- Man holdes innlogget i **30 dager**. Sessions lagres i databasen, så «Logg ut» virker med en gang.
+- `src/proxy.ts` sender folk uten cookie til innloggingssiden. Den egentlige sjekken skjer i `getCurrentUser()` i `src/lib/auth.ts`.
 
 ## Scripts
 | Kommando | Hva den gjør |
@@ -38,7 +46,11 @@ bun run dev
 ## Mappestruktur
 ```
 src/
-  app/        Sider og layout (Next.js App Router)
+  app/
+    (auth)/   Innlogging og registrering (sider + Server Actions)
+    page.tsx  Forsiden
   db/         Databaseklient og skjema (Drizzle)
+  lib/        Session, PIN-hashing og getCurrentUser()
+  proxy.ts    Sender uinnloggede til /logg-inn
 drizzle/      Genererte migrasjoner
 ```
