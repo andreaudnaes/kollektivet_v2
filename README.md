@@ -20,6 +20,7 @@ Appen er laget for mobil, kan legges på hjemskjermen som en vanlig app, og bruk
   <img src="docs/skjermbilder/forside.png" alt="Forsiden med ukas vaskeoppgave og oversikt" width="200">
   <img src="docs/skjermbilder/vaskeliste.png" alt="Vaskelista med avkrysning" width="200">
   <img src="docs/skjermbilder/handleliste.png" alt="Den felles handlelista" width="200">
+  <img src="docs/skjermbilder/kalender.png" alt="Kalenderen i månedsvisning" width="200">
   <img src="docs/skjermbilder/profil.png" alt="Profilsiden med fargevalg" width="200">
 </p>
 
@@ -38,12 +39,17 @@ Appen er laget for mobil, kan legges på hjemskjermen som en vanlig app, og bruk
 - **Forslag fra tidligere varer** mens du skriver, de mest brukte først.
 - **Stopper dobbeltføringer**, så det samme ikke står på lista to ganger.
 
+### 📅 Kalender
+- **Dag-, uke- og månedsvisning** av felles hendelser som fester, besøk, bortreiser og møter.
+- **Kategorier med egne farger.** Alle kan legge til, gi nytt navn til og bytte farge på kategorier.
+- Hendelser kan vare **hele dagen** eller ha **klokkeslett**, gå over **flere dager** og ha en beskrivelse.
+- Neste hendelse vises på forsiden.
+
 ### 🎨 Profil og farger
 - Hver beboer velger **sin egen farge** for appen, blant ni farger.
 - «Logg ut» ligger også her.
 
 ### 🔜 Kommer
-- **Kalender:** felles hendelser, besøk og bortreiser.
 - **Beholdning:** oversikt over felles forbruksvarer.
 
 ## Innlogging og sikkerhet
@@ -95,14 +101,7 @@ bun run db:generate   # lager en ny migreringsfil i drizzle/
 bun run db:migrate    # kjører den mot den lokale databasen
 ```
 
-**I produksjon** må migreringen kjøres mot Turso *før* koden som trenger den legges ut. Ellers krasjer sidene som bruker de nye tabellene:
-
-```bash
-git pull
-DATABASE_URL="libsql://..." DATABASE_AUTH_TOKEN="..." bun run db:migrate
-```
-
-Alt må stå på én linje. Ellers kjøres migreringen mot den lokale fila i stedet for Turso.
+**I produksjon** skjer dette automatisk: `bun run build` kjører `drizzle-kit migrate` mot Turso før `next build`. Vercel legger altså inn nye tabeller før den nye koden tas i bruk. Feiler migreringen, feiler bygget, og forrige versjon fortsetter å kjøre.
 
 ## Deploy
 
@@ -113,7 +112,7 @@ Appen ligger på Vercel og legges ut automatisk ved hver push til `main`. Miljø
 | Kommando | Hva den gjør |
 |---|---|
 | `bun run dev` | Starter utviklingsserveren |
-| `bun run build` | Bygger appen for produksjon |
+| `bun run build` | Kjører migreringer og bygger appen for produksjon |
 | `bun run lint` | Sjekker koden med ESLint |
 | `bun test` | Kjører testene |
 | `bun run db:generate` | Lager en ny migrering fra `src/db/schema.ts` |
@@ -130,6 +129,7 @@ src/
       page.tsx       Forsiden
       vaskeliste/    Vaskeliste og innstillinger
       handleliste/   Handleliste
+      kalender/      Kalender, hendelser og kategorier
       profil/        Profil og fargevalg
     manifest.ts    Navn og ikon for hjemskjermen
   components/      Felles komponenter, ikoner og bunnmeny
@@ -144,6 +144,7 @@ docs/skjermbilder/ Skjermbildene i denne README-en
 <summary><strong>Detaljer for utviklere</strong></summary>
 
 - **Rotasjon:** hvem som har ansvaret en uke, regnes ut fra startuka, rekkefølgen og intervallet. Det trengs ingen jobb som «roterer». Uker identifiseres med mandagens dato, i norsk tid. Logikken ligger i `src/lib/rotation.ts` og `src/lib/weeks.ts`, med tester i `src/lib/rotation.test.ts`.
+- **Kalender:** datoer lagres som `YYYY-MM-DD` og klokkeslett som `HH:MM` i norsk tid, så tidssoner og sommertid ikke skaper trøbbel. Hjelpefunksjonene ligger i `src/lib/dates.ts` (med tester), kategorifargene i `src/lib/calendar-colors.ts`.
 - **Farger:** valgt farge settes som CSS-variabelen `--accent` i `src/app/layout.tsx`. I Tailwind brukes `bg-accent`, `text-accent` og `bg-accent-tint`. Fargelista ligger i `src/lib/colors.ts`.
 - **Design:** felles stiler ligger i `src/components/ui.tsx`. Endrer du noe der, endres hele appen.
 - **App-ikon:** `src/app/icon.svg` (fane), `src/app/apple-icon.png` (iPhone) og `public/icon-192.png` / `icon-512.png` (Android).

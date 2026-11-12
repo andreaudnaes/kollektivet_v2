@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ComponentType } from "react";
 import { CalendarIcon, CartIcon, CleaningIcon, HomeIcon } from "./icons";
 
-const items = [
+type NavItem = { href: string | null; label: string; Icon: ComponentType<{ size?: number }> };
+
+// href null = kommer snart (vises grå).
+const items: NavItem[] = [
   { href: "/", label: "Hjem", Icon: HomeIcon },
   { href: "/vaskeliste", label: "Vask", Icon: CleaningIcon },
   { href: "/handleliste", label: "Handle", Icon: CartIcon },
-  { href: null, label: "Kalender", Icon: CalendarIcon },
-] as const;
+  { href: "/kalender", label: "Kalender", Icon: CalendarIcon },
+];
 
 export function BottomNav() {
   return <NavBar pathname={usePathname()} />;

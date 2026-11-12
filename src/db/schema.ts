@@ -176,3 +176,52 @@ export const shoppingItems = sqliteTable(
   },
   (table) => [index("shopping_items_bought_at_idx").on(table.boughtAt)],
 );
+
+// ---------------------------------------------------------------------------
+// Kalender
+//
+// Datoer lagres som "YYYY-MM-DD" og klokkeslett som "HH:MM", i norsk tid.
+// Da slipper vi tidssoner og sommertid helt.
+// ---------------------------------------------------------------------------
+
+/** En kategori med egen farge, f.eks. "Fest" eller "Bortreist". */
+export const calendarCategories = sqliteTable("calendar_categories", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  /** Farge-id fra src/lib/calendar-colors.ts. */
+  color: text("color").notNull(),
+  position: integer("position").notNull().default(0),
+});
+
+/** En hendelse i den felles kalenderen. */
+export const calendarEvents = sqliteTable(
+  "calendar_events",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    title: text("title").notNull(),
+    description: text("description"),
+    categoryId: text("category_id").references(() => calendarCategories.id, {
+      onDelete: "set null",
+    }),
+    startDate: text("start_date").notNull(),
+    /** Null = hele dagen. */
+    startTime: text("start_time"),
+    /** Siste dag hendelsen gjelder (lik startDate for endagshendelser). */
+    endDate: text("end_date").notNull(),
+    endTime: text("end_time"),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [
+    index("calendar_events_start_date_idx").on(table.startDate),
+    index("calendar_events_end_date_idx").on(table.endDate),
+  ],
+);

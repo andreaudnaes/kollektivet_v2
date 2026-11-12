@@ -4,8 +4,10 @@ import { BoxIcon, CalendarIcon, CartIcon, CleaningIcon, UserIcon } from "@/compo
 import { Page, ui } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
 import { assignmentForWeek, getAreas, getWeekProgress } from "@/lib/cleaning";
+import { getUpcomingEvents } from "@/lib/calendar";
+import { shortDateLabel } from "@/lib/dates";
 import { countOpenItems } from "@/lib/shopping";
-import { currentWeek, weekNumber } from "@/lib/weeks";
+import { currentWeek, todayInOslo, weekNumber } from "@/lib/weeks";
 
 export default function Home() {
   return (
@@ -39,11 +41,13 @@ function todayLabel() {
 async function HomeContent() {
   const me = await getCurrentUser();
   const week = currentWeek();
-  const [areas, progress, openItems] = await Promise.all([
+  const [areas, progress, openItems, upcoming] = await Promise.all([
     getAreas(week, week),
     getWeekProgress(week),
     countOpenItems(),
+    getUpcomingEvents(todayInOslo(), 1),
   ]);
+  const nextEvent = upcoming[0];
 
   const active = areas
     .map((area) => ({ area, assignment: assignmentForWeek(area, week) }))
@@ -140,7 +144,22 @@ async function HomeContent() {
               </span>
             </span>
           </Link>
-          <ComingSoon title="Kalender" Icon={CalendarIcon} />
+          <Link
+            href="/kalender"
+            className={`${ui.card} flex flex-col gap-7 rounded-2xl p-4 transition hover:bg-gray-50`}
+          >
+            <span className="flex size-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
+              <CalendarIcon />
+            </span>
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="font-semibold">Kalender</span>
+              <span className="truncate text-[13px] text-gray-600">
+                {nextEvent
+                  ? `${nextEvent.title} · ${nextEvent.startDate <= todayInOslo() ? "i dag" : shortDateLabel(nextEvent.startDate)}`
+                  : "Ingen planer ennå"}
+              </span>
+            </span>
+          </Link>
           <ComingSoon title="Beholdning" Icon={BoxIcon} />
         </div>
       </section>

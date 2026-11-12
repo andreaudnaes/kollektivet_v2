@@ -29,6 +29,13 @@
       "when": 1794505693177,
       "tag": "0003_parallel_nekra",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1794512217267,
+      "tag": "0004_sloppy_skrulls",
+      "breakpoints": true
     }
   ]
 }
