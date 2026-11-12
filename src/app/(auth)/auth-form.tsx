@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { ui } from "@/components/ui";
 import type { FormState } from "./actions";
 
 type Props = {
@@ -9,8 +10,7 @@ type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
 };
 
-const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-300";
+const inputClass = ui.input;
 
 export function AuthForm({ mode, action }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -18,8 +18,8 @@ export function AuthForm({ mode, action }: Props) {
 
   return (
     <form action={formAction} className="space-y-4">
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium">Navn</span>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium text-gray-700">Navn</span>
         <input
           name="name"
           required
@@ -31,8 +31,8 @@ export function AuthForm({ mode, action }: Props) {
         />
       </label>
 
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium">{isRegister ? "Velg en PIN-kode" : "PIN-kode"}</span>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium text-gray-700">{isRegister ? "Velg en PIN-kode" : "PIN-kode"}</span>
         <input
           name="pin"
           type="password"
@@ -48,8 +48,8 @@ export function AuthForm({ mode, action }: Props) {
       </label>
 
       {isRegister && (
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">Invitasjonskode</span>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-gray-700">Invitasjonskode</span>
           <input
             name="inviteCode"
             required
@@ -57,12 +57,12 @@ export function AuthForm({ mode, action }: Props) {
             autoCapitalize="none"
             className={inputClass}
           />
-          <span className="block text-xs text-zinc-500">Spør noen i kollektivet om koden.</span>
+          <span className="block text-xs text-gray-500">Spør noen i kollektivet om koden.</span>
         </label>
       )}
 
       {state?.error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p role="alert" className="rounded-[14px] bg-red-50 px-4 py-3 text-sm text-red-700">
           {state.error}
         </p>
       )}
@@ -70,23 +70,23 @@ export function AuthForm({ mode, action }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        className={`${ui.primaryButton} w-full`}
       >
         {pending ? "Et øyeblikk …" : isRegister ? "Registrer deg" : "Logg inn"}
       </button>
 
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm text-gray-600">
         {isRegister ? (
           <>
             Har du allerede bruker?{" "}
-            <Link href="/logg-inn" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+            <Link href="/logg-inn" className="font-semibold text-accent underline">
               Logg inn
             </Link>
           </>
         ) : (
           <>
             Ny i kollektivet?{" "}
-            <Link href="/registrer" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+            <Link href="/registrer" className="font-semibold text-accent underline">
               Registrer deg
             </Link>
           </>

@@ -29,10 +29,10 @@ export function WeekOverrideSelect({
         setCurrent(next);
         startTransition(() => setWeekOverride(areaId, week, next));
       }}
-      className={`w-full rounded-lg border px-3 py-2 text-sm disabled:opacity-60 sm:w-56 ${
+      className={`h-11 w-full rounded-xl border px-3 text-sm disabled:opacity-60 sm:w-60 ${
         current === "rotation"
-          ? "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-          : "border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950"
+          ? "border-gray-200 bg-white"
+          : "border-accent bg-accent-tint font-medium"
       }`}
     >
       <option value="rotation">Som rotasjonen ({rotationName ?? "ingen"})</option>
@@ -55,7 +55,7 @@ export function DeleteAreaButton({ areaId, name }: { areaId: string; name: strin
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950"
+        className="h-11 rounded-xl bg-white px-4 text-sm font-medium text-red-700 ring-1 ring-red-200 hover:bg-red-50"
       >
         Slett {name}
       </button>
@@ -63,19 +63,19 @@ export function DeleteAreaButton({ areaId, name }: { areaId: string; name: strin
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3 text-sm dark:bg-red-950">
-      <span className="text-red-800 dark:text-red-200">
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm">
+      <span className="text-red-800">
         Slette {name} med huskeliste og historikk?
       </span>
       <button
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => deleteArea(areaId))}
-        className="rounded-lg bg-red-600 px-3 py-1.5 font-medium text-white hover:bg-red-500 disabled:opacity-60"
+        className="h-11 rounded-xl bg-red-700 px-4 font-medium text-white hover:bg-red-500 disabled:opacity-60"
       >
         Ja, slett
       </button>
-      <button type="button" onClick={() => setConfirming(false)} className="underline">
+      <button type="button" onClick={() => setConfirming(false)} className="min-h-11 underline">
         Avbryt
       </button>
     </div>

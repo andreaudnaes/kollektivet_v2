@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "./session";
 
-export type CurrentUser = { id: string; name: string };
+export type CurrentUser = { id: string; name: string; color: string | null };
 
 /**
  * Henter innlogget bruker, eller sender til innloggingssiden.

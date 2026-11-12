@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { PageHeader } from "@/components/page-header";
+import { ChevronIcon } from "@/components/icons";
+import { Page, PageHeader, Section, ui } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
 import { getAreas, listResidents } from "@/lib/cleaning";
 import { currentWeek } from "@/lib/weeks";
@@ -17,12 +18,16 @@ const intervalLabel: Record<number, string> = {
 
 export default function CleaningSettingsPage() {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-5 py-8">
-      <PageHeader title="Innstillinger" back={{ href: "/vaskeliste", label: "Vaskeliste" }} />
-      <Suspense fallback={<p className="text-zinc-400">Henter områder …</p>}>
+    <Page>
+      <PageHeader
+        title="Innstillinger"
+        subtitle="Vaskeliste"
+        back={{ href: "/vaskeliste", label: "Tilbake til vaskelista" }}
+      />
+      <Suspense fallback={<p className="text-gray-500">Henter områder …</p>}>
         <AreaList />
       </Suspense>
-    </main>
+    </Page>
   );
 }
 
@@ -34,47 +39,47 @@ async function AreaList() {
 
   return (
     <>
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium text-zinc-500">Ansvarsområder</h2>
+      <Section title="Ansvarsområder">
         {areas.length === 0 ? (
-          <p className="text-zinc-600 dark:text-zinc-400">Ingen områder ennå. Legg til det første under.</p>
+          <p className="text-gray-600">Ingen områder ennå. Legg til det første under.</p>
         ) : (
-          <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          <ul className={`${ui.card} divide-y divide-gray-100 overflow-hidden`}>
             {areas.map((area) => (
               <li key={area.id}>
                 <Link
                   href={`/vaskeliste/innstillinger/${area.id}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  className="flex items-center justify-between gap-3 px-5 py-4 transition hover:bg-gray-50"
                 >
-                  <div>
-                    <p className="font-medium">{area.name}</p>
-                    <p className="text-sm text-zinc-500">
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-semibold">{area.name}</span>
+                    <span className="text-sm text-gray-600">
                       {intervalLabel[area.intervalWeeks]} ·{" "}
                       {area.memberIds.length === 0
                         ? "ingen i rotasjonen"
                         : area.memberIds.map((id) => names.get(id)).join(", ")}
-                    </p>
-                  </div>
-                  <span className="text-zinc-400">›</span>
+                    </span>
+                  </span>
+                  <ChevronIcon className="shrink-0 text-gray-400" />
                 </Link>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Section>
 
       <form action={createArea} className="flex gap-2">
+        <label className="sr-only" htmlFor="new-area">
+          Nytt område
+        </label>
         <input
+          id="new-area"
           name="name"
           required
           maxLength={40}
           placeholder="Nytt område, f.eks. Gang"
-          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900"
+          className={ui.input}
         />
-        <button
-          type="submit"
-          className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2.5 font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+        <button type="submit" className={`${ui.primaryButton} shrink-0`}>
           Legg til
         </button>
       </form>

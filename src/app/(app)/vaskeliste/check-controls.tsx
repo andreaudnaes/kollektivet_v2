@@ -1,6 +1,8 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
+import { CheckIcon } from "@/components/icons";
+import { ui } from "@/components/ui";
 import { setAreaDone, setTaskChecked } from "./actions";
 
 export function TaskCheckbox({
@@ -20,7 +22,7 @@ export function TaskCheckbox({
   const [, startTransition] = useTransition();
 
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-900">
+    <label className="flex min-h-11 cursor-pointer items-center gap-3 text-[15px]">
       <input
         type="checkbox"
         checked={optimisticChecked}
@@ -31,14 +33,10 @@ export function TaskCheckbox({
             await setTaskChecked(taskId, week, next);
           });
         }}
-        className="mt-0.5 size-5 shrink-0 accent-emerald-600"
+        className="size-[22px] shrink-0 accent-accent"
       />
-      <span className="flex-1">
-        <span className={optimisticChecked ? "text-zinc-400 line-through" : undefined}>{text}</span>
-        {optimisticChecked && checkedBy && (
-          <span className="ml-2 text-xs text-zinc-400">{checkedBy}</span>
-        )}
-      </span>
+      <span className={`flex-1 ${optimisticChecked ? "text-gray-500 line-through" : ""}`}>{text}</span>
+      {optimisticChecked && checkedBy && <span className="text-xs text-gray-500">{checkedBy}</span>}
     </label>
   );
 }
@@ -65,13 +63,16 @@ export function DoneButton({
 
   if (optimisticDone) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-        <span>✓ {doneLabel ?? "Gjort"}</span>
+      <div className="flex items-center justify-between gap-3 rounded-[14px] bg-emerald-50 px-3.5 py-1 text-sm text-emerald-800">
+        <span className="flex items-center gap-2 py-2">
+          <CheckIcon size={18} />
+          {doneLabel ?? "Gjort"}
+        </span>
         <button
           type="button"
           onClick={() => toggle(false)}
           disabled={pending}
-          className="text-emerald-700 underline disabled:opacity-60 dark:text-emerald-300"
+          className="min-h-11 underline disabled:opacity-60"
         >
           Angre
         </button>
@@ -80,12 +81,7 @@ export function DoneButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => toggle(true)}
-      disabled={pending}
-      className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-medium text-white transition hover:bg-emerald-500 disabled:opacity-60"
-    >
+    <button type="button" onClick={() => toggle(true)} disabled={pending} className={ui.primaryButton}>
       Merk som gjort
     </button>
   );

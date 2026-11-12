@@ -11,6 +11,8 @@ export const users = sqliteTable("users", {
   nameKey: text("name_key").notNull().unique(),
   /** Hashet PIN (scrypt). Selve PIN-en lagres aldri. */
   pinHash: text("pin_hash").notNull(),
+  /** Valgt farge for appen (id fra src/lib/colors.ts). Null = standardfargen. */
+  color: text("color"),
   /** Antall feil PIN-forsøk på rad. Nullstilles ved vellykket innlogging. */
   failedAttempts: integer("failed_attempts").notNull().default(0),
   /** Hvis satt: kontoen er midlertidig låst til dette tidspunktet. */

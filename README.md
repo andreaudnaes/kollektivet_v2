@@ -26,6 +26,10 @@ bun run dev
 ```
 Åpne http://localhost:3000 og registrer deg med navn, en firesifret PIN og invitasjonskoden.
 
+## Design og farger
+- Designet («Klar») bruker felles stiler fra `src/components/ui.tsx` og en bunnmeny for mobil.
+- Hver beboer velger sin egen **aksentfarge** under **Profil** (9 farger, grønn er standard). Fargene ligger i `src/lib/colors.ts` og settes som CSS-variabelen `--accent` (Tailwind: `bg-accent`, `text-accent`, `bg-accent-tint`).
+
 ## Vaskeliste
 - **Ansvarsområder** (kjøkken, bad …) med egen rotasjon: hvem som er med, rekkefølge, hvor ofte det bytter (hver/annenhver/hver tredje uke) og startuke.
 - Rotasjonen regnes ut automatisk ut fra uke (mandag–søndag, norsk tid). Ingen må trykke «roter».
@@ -56,9 +60,8 @@ bun run dev
 src/
   app/
     (auth)/   Innlogging og registrering (sider + Server Actions)
-    vaskeliste/  Vaskeliste, innstillinger og Server Actions
-    page.tsx  Forsiden
-  components/ Felles komponenter
+    (app)/    Sider for innloggede: forside, vaskeliste, profil (med bunnmeny)
+  components/ Felles komponenter, ikoner og bunnmeny
   db/         Databaseklient og skjema (Drizzle)
   lib/        Innlogging, uker, rotasjon og datahenting
   proxy.ts    Sender uinnloggede til /logg-inn

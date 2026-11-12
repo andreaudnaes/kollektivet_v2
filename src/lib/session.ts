@@ -44,12 +44,12 @@ export async function getSessionUser() {
   if (!token) return null;
 
   const [row] = await db
-    .select({ id: users.id, name: users.name, expiresAt: sessions.expiresAt })
+    .select({ id: users.id, name: users.name, color: users.color, expiresAt: sessions.expiresAt })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(eq(sessions.id, hashToken(token)))
     .limit(1);
 
   if (!row || row.expiresAt.getTime() < Date.now()) return null;
-  return { id: row.id, name: row.name };
+  return { id: row.id, name: row.name, color: row.color };
 }
