@@ -26,6 +26,13 @@ bun run dev
 ```
 Åpne http://localhost:3000 og registrer deg med navn, en firesifret PIN og invitasjonskoden.
 
+## Vaskeliste
+- **Ansvarsområder** (kjøkken, bad …) med egen rotasjon: hvem som er med, rekkefølge, hvor ofte det bytter (hver/annenhver/hver tredje uke) og startuke.
+- Rotasjonen regnes ut automatisk ut fra uke (mandag–søndag, norsk tid). Ingen må trykke «roter».
+- **Avkrysning** som alle ser: «Merk som gjort» per område, og valgfri **huskeliste** med punkter som krysses av hver uke.
+- **Enkeltuker** kan overstyres i innstillingene: gi uka til noen andre, eller sett «Ingen vask». Resten av rotasjonen påvirkes ikke.
+- Logikken ligger i `src/lib/rotation.ts` og `src/lib/weeks.ts`, med tester i `src/lib/rotation.test.ts` (`bun test`).
+
 ## Innlogging
 - Beboere registrerer seg med **navn**, **firesifret PIN** og den felles **invitasjonskoden** (`INVITE_CODE`).
 - PIN-koden lagres hashet med scrypt.
@@ -39,6 +46,7 @@ bun run dev
 | `bun run dev` | Starter utviklingsserveren |
 | `bun run build` | Bygger appen for produksjon |
 | `bun run lint` | Sjekker koden med ESLint |
+| `bun test` | Kjører testene |
 | `bun run db:generate` | Lager en ny migrasjon fra `src/db/schema.ts` |
 | `bun run db:migrate` | Kjører migrasjoner mot databasen |
 | `bun run db:studio` | Åpner Drizzle Studio for å se på dataene |
@@ -48,9 +56,11 @@ bun run dev
 src/
   app/
     (auth)/   Innlogging og registrering (sider + Server Actions)
+    vaskeliste/  Vaskeliste, innstillinger og Server Actions
     page.tsx  Forsiden
+  components/ Felles komponenter
   db/         Databaseklient og skjema (Drizzle)
-  lib/        Session, PIN-hashing og getCurrentUser()
+  lib/        Innlogging, uker, rotasjon og datahenting
   proxy.ts    Sender uinnloggede til /logg-inn
 drizzle/      Genererte migrasjoner
 ```

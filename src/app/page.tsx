@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { logout } from "./(auth)/actions";
 
-const features = [
-  { title: "Vaskeliste", description: "Hvem har ansvar for hva denne uka." },
+const features: { title: string; description: string; href?: string }[] = [
+  { title: "Vaskeliste", description: "Hvem har ansvar for hva denne uka.", href: "/vaskeliste" },
   { title: "Handleliste", description: "Det som må kjøpes inn til fellesskapet." },
   { title: "Kalender", description: "Felles hendelser, besøk og bortreiser." },
   { title: "Beholdning", description: "Oversikt over felles forbruksvarer." },
@@ -30,18 +31,35 @@ export default function Home() {
       </header>
 
       <ul className="grid gap-3 sm:grid-cols-2">
-        {features.map((feature) => (
-          <li
-            key={feature.title}
-            className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
-          >
-            <h2 className="font-medium">{feature.title}</h2>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              {feature.description}
-            </p>
-            <p className="mt-3 text-xs uppercase tracking-wide text-zinc-400">Kommer snart</p>
-          </li>
-        ))}
+        {features.map((feature) => {
+          const content = (
+            <>
+              <h2 className="font-medium">{feature.title}</h2>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                {feature.description}
+              </p>
+              {!feature.href && (
+                <p className="mt-3 text-xs uppercase tracking-wide text-zinc-400">Kommer snart</p>
+              )}
+            </>
+          );
+          return (
+            <li key={feature.title}>
+              {feature.href ? (
+                <Link
+                  href={feature.href}
+                  className="block h-full rounded-xl border border-zinc-300 p-4 transition hover:border-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:border-zinc-300 dark:hover:bg-zinc-900"
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div className="h-full rounded-xl border border-zinc-200 p-4 opacity-70 dark:border-zinc-800">
+                  {content}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </main>
   );
