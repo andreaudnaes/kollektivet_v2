@@ -147,7 +147,7 @@ docs/skjermbilder/ Skjermbildene i denne README-en
 - **Kalender:** datoer lagres som `YYYY-MM-DD` og klokkeslett som `HH:MM` i norsk tid, så tidssoner og sommertid ikke skaper trøbbel. Hjelpefunksjonene ligger i `src/lib/dates.ts` (med tester), kategorifargene i `src/lib/calendar-colors.ts`.
 - **Farger:** valgt farge settes som CSS-variabelen `--accent` i `src/app/layout.tsx`. I Tailwind brukes `bg-accent`, `text-accent` og `bg-accent-tint`. Fargelista ligger i `src/lib/colors.ts`.
 - **Hastighet og hurtigbuffer:** hovedsidene henter dataene sine i en funksjon med `"use cache: private"`, og lenkene i bunnmenyen har `prefetch`. Sidene hentes da på forhånd og huskes i nettleseren i `CLIENT_STALE_SECONDS` (60 s, `src/lib/page-cache.ts`), så faner åpnes uten å vente på serveren. Alle Server Actions kaller `invalidateAll()` (`src/lib/revalidate.ts`), som tømmer minnet, så egne endringer vises med en gang. Endringer andre gjør, vises etter maks 60 sekunder, ved omlasting, eller når appen åpnes igjen fra bakgrunnen (`RefreshOnReturn`). Sjeldne sider (innstillinger og skjemaer) kaller `connection()` og hentes ved hvert besøk.
-- **Region:** `vercel.json` kjører serverfunksjonene i Frankfurt (`fra1`), nær Turso-databasen.
+- **Region:** `vercel.json` kjører serverfunksjonene i Stockholm (`arn1`), samme sted som Turso-databasen.
 - **Design:** felles stiler ligger i `src/components/ui.tsx`. Endrer du noe der, endres hele appen.
 - **App-ikon:** `src/app/icon.svg` (fane), `src/app/apple-icon.png` (iPhone) og `public/icon-192.png` / `icon-512.png` (Android).
 - **Next.js 16:** denne versjonen har endringer som ikke alltid stemmer med eldre dokumentasjon. Se `AGENTS.md` og dokumentasjonen i `node_modules/next/dist/docs/`.
